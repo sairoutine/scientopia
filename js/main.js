@@ -45,9 +45,9 @@ window.onload = function(){
 
 
 		for(var i=0, len=spectrums.length; i<len; i++){
-			var posX = barMargin + i * (barWidth + barMargin);
-			var posY = 0;
 			var barHeight = spectrums[i];
+			var posX = barMargin + i * (barWidth + barMargin);
+			var posY = canvas.height - barHeight - barMargin;
 
 			canvasContext.fillStyle = 'black';
 			canvasContext.globalAlpha = 0.5;
