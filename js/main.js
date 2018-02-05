@@ -50,6 +50,16 @@ window.onload = function(){
 		imageFileReader.readAsDataURL(e.target.files[0]);
 	});
 
+	document.getElementById('clear').addEventListener('click', function(e){
+		img = undefined;
+		// 既に再生していたら止める
+		if(source) {
+			source.stop();
+			cancelAnimationFrame(animationId);
+		}
+		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+	});
+
 
 
 	var render = function(){
