@@ -4,7 +4,7 @@
 window.onload = function(){
 	var source, animationId;
 	var audioContext = new (window.AudioContext || window.webkitAudioContext);
-	var fileReader   = new FileReader;
+	var audioFileReader   = new FileReader;
 
 	var analyser = audioContext.createAnalyser();
 	analyser.fftSize = 128;
@@ -13,8 +13,8 @@ window.onload = function(){
 	var canvas        = document.getElementById('visualizer');
 	var canvasContext = canvas.getContext('2d');
 
-	fileReader.onload = function(){
-		audioContext.decodeAudioData(fileReader.result, function(buffer){
+	audioFileReader.onload = function(){
+		audioContext.decodeAudioData(audioFileReader.result, function(buffer){
 			// 既に再生していたら止める
 			if(source) {
 				source.stop();
@@ -31,7 +31,7 @@ window.onload = function(){
 	};
 
 	document.getElementById('file').addEventListener('change', function(e){
-		fileReader.readAsArrayBuffer(e.target.files[0]);
+		audioFileReader.readAsArrayBuffer(e.target.files[0]);
 	});
 
 	var render = function(){
