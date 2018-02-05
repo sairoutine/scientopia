@@ -72,7 +72,7 @@ window.onload = function(){
 
 	var writeToDatabase = function () {
 		if(!db) return;
-console.log(audio_data);
+
 		var transaction = db.transaction("assets", "readwrite");
 		transaction.oncomplete = function(event) {
 		};
@@ -102,6 +102,15 @@ console.log(audio_data);
 			cancelAnimationFrame(animationId);
 		}
 		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+		var transaction = db.transaction("assets", "readwrite");
+		transaction.oncomplete = function(event) {
+		};
+		var objectStore = transaction.objectStore("assets");
+		var request = objectStore.delete(PAGE_ID);
+		request.onsuccess = function(event) {};
+
+
 
 		document.getElementById('audio_file').value = "";
 		document.getElementById('image_file').value = "";
