@@ -30,7 +30,7 @@ window.onload = function(){
 		});
 	};
 
-	document.getElementById('file').addEventListener('change', function(e){
+	document.getElementById('audio_file').addEventListener('change', function(e){
 		audioFileReader.readAsArrayBuffer(e.target.files[0]);
 	});
 
