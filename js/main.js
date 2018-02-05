@@ -12,8 +12,6 @@ window.onload = function(){
 
 	var canvas        = document.getElementById('visualizer');
 	var canvasContext = canvas.getContext('2d');
-	//canvas.setAttribute('width', analyser.frequencyBinCount * 10); // 横幅
-	//canvas.setAttribute('height', 255); // 縦幅
 
 	fileReader.onload = function(){
 		audioContext.decodeAudioData(fileReader.result, function(buffer){
@@ -59,7 +57,6 @@ window.onload = function(){
   function sizing() {
     canvas.height = container.offsetHeight;
     canvas.width = container.offsetWidth;
-	  console.log(canvas.width, canvas.height);
   }
 
   window.addEventListener('resize', function() {
