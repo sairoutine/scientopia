@@ -12,7 +12,8 @@ window.onload = function(){
 
 	var canvas        = document.getElementById('visualizer');
 	var canvasContext = canvas.getContext('2d');
-	canvas.setAttribute('width', analyser.frequencyBinCount * 10); // 横幅
+	//canvas.setAttribute('width', analyser.frequencyBinCount * 10); // 横幅
+	//canvas.setAttribute('height', 255); // 縦幅
 
 	fileReader.onload = function(){
 		audioContext.decodeAudioData(fileReader.result, function(buffer){
@@ -39,12 +40,31 @@ window.onload = function(){
 		var spectrums = new Uint8Array(analyser.frequencyBinCount);
 		analyser.getByteFrequencyData(spectrums);
 
-		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+		canvasContext.fillStyle = 'black';
+		canvasContext.fillRect(0, 0, canvas.width, canvas.height);
 		for(var i=0, len=spectrums.length; i<len; i++){
+			canvasContext.fillStyle = 'white';
 			canvasContext.fillRect(i*10, 0, 5, spectrums[i]);
 		}
 
 		animationId = requestAnimationFrame(render);
 	};
 };
+
+(function() {
+  var canvas = document.getElementById('visualizer');
+  var container = document.getElementById('wrap');
+  sizing();
+
+  function sizing() {
+    canvas.height = container.offsetHeight;
+    canvas.width = container.offsetWidth;
+	  console.log(canvas.width, canvas.height);
+  }
+
+  window.addEventListener('resize', function() {
+	sizing();
+  });
+})();
+
 

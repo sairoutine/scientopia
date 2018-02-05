@@ -2,17 +2,39 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Audio Visualizer</title>
+<title>scientopia</title>
+<style>
+html,
+#body {
+	position:absolute;
+	top:0;
+	left:0;
+}
+#wrap {
+	height: 100%;
+	width: 100%;
+	position: fixed;
+}
+#visualizer {
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+}
+</style>
 </head>
 <body>
+<div id="wrap">
+	<canvas id="visualizer"></canvas>
+</div>
 
-音楽ファイルを選択（アップロードは発生しません。）<br>
-
-<form action="">
-	<input id="file" type="file"><br />
-</form>
-<canvas id="visualizer" height="255"></canvas>
-
+<section id="body">
+	<form action="">
+		音楽ファイルを選択<br>
+		<input id="file" type="file"><br />
+	</form>
+</section>
 <script type="text/javascript" src="./js/main.js"></script>
 </body>
 </html>
