@@ -27,6 +27,11 @@ window.onload = function(){
 			source.connect(analyser);
 			source.start(0);
 
+			if (source && img) {
+				document.getElementById('initial').style.display = "none";
+				document.getElementById('playing').style.display = "block";
+			}
+
 			animationId = requestAnimationFrame(render);
 		});
 	};
@@ -36,6 +41,10 @@ window.onload = function(){
 		tmpImg.src = imageFileReader.result;
 		tmpImg.onload = function() {
 			img = tmpImg;
+			if (source && img) {
+				document.getElementById('initial').style.display = "none";
+				document.getElementById('playing').style.display = "block";
+			}
 		};
 	};
 
@@ -58,6 +67,12 @@ window.onload = function(){
 			cancelAnimationFrame(animationId);
 		}
 		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+		document.getElementById('audio_file').value = "";
+		document.getElementById('image_file').value = "";
+
+		document.getElementById('initial').style.display = "block";
+		document.getElementById('playing').style.display = "none";
 	});
 
 

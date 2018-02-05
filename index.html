@@ -31,12 +31,15 @@ html,
 
 <section id="body">
 	<form action="">
-		音楽ファイルを選択(mp3, wav etc..)<br>
-		<input id="audio_file" type="file"><br />
-		画像ファイルを選択<br>
-		<input id="image_file" type="file"><br />
-		画像ファイルを選択<br>
-		<input type="button" id="clear" value="クリア"><br />
+		<span id="initial" style="display: block">
+			音楽ファイルを選択(mp3, wav etc..)<br>
+			<input id="audio_file" type="file"><br />
+			画像ファイルを選択<br>
+			<input id="image_file" type="file"><br />
+		</span>
+		<span id="playing" style="display: none">
+			<input type="button" id="clear" value="クリア"><br />
+		</span>
 	</form>
 </section>
 <script type="text/javascript" src="./js/main.js"></script>
