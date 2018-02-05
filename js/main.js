@@ -2,9 +2,10 @@
 /* global Uint8Array */
 
 window.onload = function(){
-	var source, animationId;
+	var source, img, animationId;
 	var audioContext = new (window.AudioContext || window.webkitAudioContext);
 	var audioFileReader   = new FileReader;
+	var imageFileReader   = new FileReader;
 
 	var analyser = audioContext.createAnalyser();
 	analyser.fftSize = 128;
@@ -30,29 +31,65 @@ window.onload = function(){
 		});
 	};
 
+	imageFileReader.onload = function(){
+		var tmpImg = new Image();
+		tmpImg.src = imageFileReader.result;
+		tmpImg.onload = function() {
+			img = tmpImg;
+		};
+	};
+
+
+
+
 	document.getElementById('audio_file').addEventListener('change', function(e){
 		audioFileReader.readAsArrayBuffer(e.target.files[0]);
 	});
+
+	document.getElementById('image_file').addEventListener('change', function(e){
+		imageFileReader.readAsDataURL(e.target.files[0]);
+	});
+
+
 
 	var render = function(){
 		var spectrums = new Uint8Array(analyser.frequencyBinCount);
 		analyser.getByteFrequencyData(spectrums);
 
+		canvasContext.save();
+		canvasContext.fillStyle = 'black';
 		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+		canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+		canvasContext.restore();
+
+		if (img) {
+			canvasContext.drawImage(img,
+				0,
+				0,
+				img.width,
+				img.height,
+				0,
+				0,
+				canvas.width,
+				canvas.height
+			);
+
+		}
 
 		var barWidth = canvas.width / spectrums.length /2;
 		var barMargin = barWidth;
 
-
+		canvasContext.save();
 		for(var i=0, len=spectrums.length; i<len; i++){
 			var barHeight = spectrums[i];
 			var posX = barMargin + i * (barWidth + barMargin);
 			var posY = canvas.height - barHeight - barMargin;
 
-			canvasContext.fillStyle = 'black';
-			canvasContext.globalAlpha = 0.5;
+			canvasContext.fillStyle = 'white';
+			canvasContext.globalAlpha = 0.8;
 			canvasContext.fillRect(posX, posY, barWidth, barHeight);
 		}
+		canvasContext.restore();
 
 		animationId = requestAnimationFrame(render);
 	};
