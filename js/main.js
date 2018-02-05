@@ -38,11 +38,20 @@ window.onload = function(){
 		var spectrums = new Uint8Array(analyser.frequencyBinCount);
 		analyser.getByteFrequencyData(spectrums);
 
-		canvasContext.fillStyle = 'black';
-		canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+		var barWidth = canvas.width / spectrums.length /2;
+		var barMargin = barWidth;
+
+
 		for(var i=0, len=spectrums.length; i<len; i++){
-			canvasContext.fillStyle = 'white';
-			canvasContext.fillRect(i*10, 0, 5, spectrums[i]);
+			var posX = barMargin + i * (barWidth + barMargin);
+			var posY = 0;
+			var barHeight = spectrums[i];
+
+			canvasContext.fillStyle = 'black';
+			canvasContext.globalAlpha = 0.5;
+			canvasContext.fillRect(posX, posY, barWidth, barHeight);
 		}
 
 		animationId = requestAnimationFrame(render);
