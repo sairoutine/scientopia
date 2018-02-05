@@ -1,8 +1,17 @@
 'use strict';
 /* global Uint8Array */
 
+var DATABASE_VERSION = 1;
+var PAGE_ID = 1;
+
+/*
+window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"};
+window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+*/
+
 window.onload = function(){
-	var source, img, animationId;
+	var source, audio_data, img, animationId, db;
 	var audioContext = new (window.AudioContext || window.webkitAudioContext);
 	var audioFileReader   = new FileReader;
 	var imageFileReader   = new FileReader;
@@ -15,7 +24,31 @@ window.onload = function(){
 	var canvasContext = canvas.getContext('2d');
 
 	audioFileReader.onload = function(){
-		audioContext.decodeAudioData(audioFileReader.result, function(buffer){
+		setAudio(audioFileReader.result);
+	};
+
+	imageFileReader.onload = function(){
+		setImage(imageFileReader.result);
+	};
+
+	var setImage = function (base64) {
+		var tmpImg = new Image();
+		tmpImg.src = base64;
+		tmpImg.onload = function() {
+			img = tmpImg;
+
+			if (source && img) {
+				document.getElementById('initial').style.display = "none";
+				document.getElementById('playing').style.display = "block";
+				writeToDatabase();
+			}
+		};
+	};
+	var setAudio = function (tmp_audio_data) {
+		// decodeAudioData が audio_data を破壊するので、cloneしておく
+		audio_data = tmp_audio_data.slice(0);
+
+		audioContext.decodeAudioData(tmp_audio_data, function(buffer){
 			// 既に再生していたら止める
 			if(source) {
 				source.stop();
@@ -30,25 +63,27 @@ window.onload = function(){
 			if (source && img) {
 				document.getElementById('initial').style.display = "none";
 				document.getElementById('playing').style.display = "block";
+				writeToDatabase();
 			}
 
 			animationId = requestAnimationFrame(render);
 		});
 	};
 
-	imageFileReader.onload = function(){
-		var tmpImg = new Image();
-		tmpImg.src = imageFileReader.result;
-		tmpImg.onload = function() {
-			img = tmpImg;
-			if (source && img) {
-				document.getElementById('initial').style.display = "none";
-				document.getElementById('playing').style.display = "block";
-			}
+	var writeToDatabase = function () {
+		if(!db) return;
+console.log(audio_data);
+		var transaction = db.transaction("assets", "readwrite");
+		transaction.oncomplete = function(event) {
 		};
+		var objectStore = transaction.objectStore("assets");
+		var request = objectStore.put({
+			id: PAGE_ID,
+			audio: new Blob([ audio_data ]),
+			img: img.src,
+		});
+		request.onsuccess = function(event) {};
 	};
-
-
 
 
 	document.getElementById('audio_file').addEventListener('change', function(e){
@@ -117,6 +152,34 @@ window.onload = function(){
 		canvasContext.restore();
 
 		animationId = requestAnimationFrame(render);
+	};
+
+	var request = window.indexedDB.open("scientopia", DATABASE_VERSION);
+	request.onupgradeneeded = function(event) {
+		db = event.target.result;
+		// このデータベース用の objectStore を作成します
+		db.createObjectStore("assets", { keyPath: "id" });
+	}; // onupgradeneeded が発生した場合にも onsuccess は発生する
+	request.onsuccess = function(event) {
+		db = event.target.result;
+		getAssets();
+	};
+
+	var getAssets = function () {
+		if(!db) return;
+
+		db.transaction("assets", "readwrite").objectStore("assets").get(PAGE_ID).onsuccess = function(event) {
+			var data = event.target.result;
+			// 再生
+			if (data) {
+				setImage(data.img);
+				var fileReader = new FileReader();
+				fileReader.onload = function() {
+					setAudio(fileReader.result);
+				};
+				fileReader.readAsArrayBuffer(data.audio);
+			}
+		};
 	};
 };
 
