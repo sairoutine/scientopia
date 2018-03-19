@@ -4,6 +4,7 @@ function Spectrum(name, exponent, render) {
 	this.name = name;
 	this.exponent = exponent;
 	this.renderer = render;
+	this.id = -1;
 }
 
 /**
@@ -32,13 +33,15 @@ var spectrum_renders = {
 
 //init spectrum_types
 //*
-var spectrum_types_element = document.getElementById('spectrum_types');
-for (var id in spectrum_renders){
-	var value = spectrum_renders[id];
-	var element = document.createElement("option");
-	element.value = id;
-	element.innerText = value.name;
-	spectrum_types_element.appendChild(element);
-	console.log(id, value);
-}
+(function() {
+	var spectrum_types_element = document.getElementById('spectrum_types');
+	for (var id in spectrum_renders){
+		var value = spectrum_renders[id];
+		var element = document.createElement("option");
+		element.value = id;
+		element.innerText = value.name;
+		spectrum_types_element.appendChild(element);
+		value.id = id;
+	}
+})();
 // */

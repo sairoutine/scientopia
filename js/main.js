@@ -91,6 +91,7 @@ window.onload = function() {
 			id: PAGE_ID,
 			audio: new Blob([audio_data]),
 			img: img.src,
+			spectrum: spectrum_render.id,
 		});
 		request.onsuccess = function(event) {};
 	};
@@ -190,6 +191,7 @@ window.onload = function() {
 					setAudio(fileReader.result);
 				};
 				fileReader.readAsArrayBuffer(data.audio);
+				spectrum_render = spectrum_renders[data.spectrum]
 			}
 		};
 	};
