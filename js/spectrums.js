@@ -28,6 +28,40 @@ var spectrum_renders = {
 			}
 		}
 	),
+	detailed: new Spectrum(
+		"detailed",
+		9,
+		function (canvas, spectrums, canvasContext) {
+			var barWidth = canvas.width / spectrums.length / 2;
+			var barMargin = barWidth;
+			for (var i = 0, len = spectrums.length; i < len; i++) {
+				var barHeight = spectrums[i];
+				var posX = barMargin + i * (barWidth + barMargin);
+				var posY = canvas.height - barHeight - barMargin;
+
+				canvasContext.fillStyle = 'white';
+				canvasContext.globalAlpha = 0.8;
+				canvasContext.fillRect(posX, posY, barWidth, barHeight);
+			}
+		}
+	),
+	rough: new Spectrum(
+		"rough",
+		5,
+		function (canvas, spectrums, canvasContext) {
+			var barWidth = canvas.width / spectrums.length / 2;
+			var barMargin = barWidth;
+			for (var i = 0, len = spectrums.length; i < len; i++) {
+				var barHeight = spectrums[i];
+				var posX = barMargin + i * (barWidth + barMargin);
+				var posY = canvas.height - barHeight - barMargin;
+
+				canvasContext.fillStyle = 'white';
+				canvasContext.globalAlpha = 0.8;
+				canvasContext.fillRect(posX, posY, barWidth, barHeight);
+			}
+		}
+	),
 };
 
 
