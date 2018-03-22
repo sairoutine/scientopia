@@ -10,31 +10,41 @@ window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || 
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 */
 
-window.onload = function(){
+window.onload = function() {
+	var spectrum_render = spectrum_renders[document.getElementById('spectrum_types').value];
+	var renderer;
+
 	var source, audio_data, img, animationId, db;
 	var audioContext = new (window.AudioContext || window.webkitAudioContext);
-	var audioFileReader   = new FileReader;
-	var imageFileReader   = new FileReader;
+	var audioFileReader = new FileReader;
+	var imageFileReader = new FileReader;
 
 	var analyser = audioContext.createAnalyser();
-	analyser.fftSize = 128;
+	//analyser.fftSize = spectrum_render.exponent;
 	analyser.connect(audioContext.destination);
 
-	var canvas        = document.getElementById('visualizer');
+	var canvas = document.getElementById('visualizer');
 	var canvasContext = canvas.getContext('2d');
 
-	audioFileReader.onload = function(){
+	function update_spectrum_render() {
+		analyser.fftSize = Math.pow(2, spectrum_render.exponent);
+		renderer = spectrum_render.renderer;
+	}
+
+	update_spectrum_render();
+
+	audioFileReader.onload = function () {
 		setAudio(audioFileReader.result);
 	};
 
-	imageFileReader.onload = function(){
+	imageFileReader.onload = function () {
 		setImage(imageFileReader.result);
 	};
 
 	var setImage = function (base64) {
 		var tmpImg = new Image();
 		tmpImg.src = base64;
-		tmpImg.onload = function() {
+		tmpImg.onload = function () {
 			img = tmpImg;
 
 			if (source && img) {
@@ -48,9 +58,9 @@ window.onload = function(){
 		// decodeAudioData が audio_data を破壊するので、cloneしておく
 		audio_data = tmp_audio_data.slice(0);
 
-		audioContext.decodeAudioData(tmp_audio_data, function(buffer){
+		audioContext.decodeAudioData(tmp_audio_data, function (buffer) {
 			// 既に再生していたら止める
-			if(source) {
+			if (source) {
 				source.stop();
 				cancelAnimationFrame(animationId);
 			}
@@ -71,40 +81,41 @@ window.onload = function(){
 	};
 
 	var writeToDatabase = function () {
-		if(!db) return;
+		if (!db) return;
 
 		var transaction = db.transaction("assets", "readwrite");
-		transaction.oncomplete = function(event) {
+		transaction.oncomplete = function (event) {
 		};
 		var objectStore = transaction.objectStore("assets");
 		var request = objectStore.put({
 			id: PAGE_ID,
-			audio: new Blob([ audio_data ]),
+			audio: new Blob([audio_data]),
 			img: img.src,
+			spectrum: spectrum_render.id,
 		});
 		request.onsuccess = function(event) {};
 	};
 
 
-	document.getElementById('audio_file').addEventListener('change', function(e){
+	document.getElementById('audio_file').addEventListener('change', function (e) {
 		audioFileReader.readAsArrayBuffer(e.target.files[0]);
 	});
 
-	document.getElementById('image_file').addEventListener('change', function(e){
+	document.getElementById('image_file').addEventListener('change', function (e) {
 		imageFileReader.readAsDataURL(e.target.files[0]);
 	});
 
-	document.getElementById('clear').addEventListener('click', function(e){
+	document.getElementById('clear').addEventListener('click', function (e) {
 		img = undefined;
 		// 既に再生していたら止める
-		if(source) {
+		if (source) {
 			source.stop();
 			cancelAnimationFrame(animationId);
 		}
 		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
 
 		var transaction = db.transaction("assets", "readwrite");
-		transaction.oncomplete = function(event) {
+		transaction.oncomplete = function (event) {
 		};
 		var objectStore = transaction.objectStore("assets");
 		var request = objectStore.delete(PAGE_ID);
@@ -119,9 +130,13 @@ window.onload = function(){
 		document.getElementById('playing').style.display = "none";
 	});
 
+	document.getElementById('spectrum_types').addEventListener('change', function(e){
+		spectrum_render = spectrum_renders[document.getElementById('spectrum_types').value];
+		update_spectrum_render();
+	});
 
 
-	var render = function(){
+	var render = function () {
 		var spectrums = new Uint8Array(analyser.frequencyBinCount);
 		analyser.getByteFrequencyData(spectrums);
 
@@ -145,48 +160,38 @@ window.onload = function(){
 
 		}
 
-		var barWidth = canvas.width / spectrums.length /2;
-		var barMargin = barWidth;
-
 		canvasContext.save();
-		for(var i=0, len=spectrums.length; i<len; i++){
-			var barHeight = spectrums[i];
-			var posX = barMargin + i * (barWidth + barMargin);
-			var posY = canvas.height - barHeight - barMargin;
-
-			canvasContext.fillStyle = 'white';
-			canvasContext.globalAlpha = 0.8;
-			canvasContext.fillRect(posX, posY, barWidth, barHeight);
-		}
+		renderer(canvas, spectrums, canvasContext);
 		canvasContext.restore();
 
 		animationId = requestAnimationFrame(render);
 	};
 
 	var request = window.indexedDB.open("scientopia", DATABASE_VERSION);
-	request.onupgradeneeded = function(event) {
+	request.onupgradeneeded = function (event) {
 		db = event.target.result;
 		// このデータベース用の objectStore を作成します
-		db.createObjectStore("assets", { keyPath: "id" });
+		db.createObjectStore("assets", {keyPath: "id"});
 	}; // onupgradeneeded が発生した場合にも onsuccess は発生する
-	request.onsuccess = function(event) {
+	request.onsuccess = function (event) {
 		db = event.target.result;
 		getAssets();
 	};
 
 	var getAssets = function () {
-		if(!db) return;
+		if (!db) return;
 
-		db.transaction("assets", "readwrite").objectStore("assets").get(PAGE_ID).onsuccess = function(event) {
+		db.transaction("assets", "readwrite").objectStore("assets").get(PAGE_ID).onsuccess = function (event) {
 			var data = event.target.result;
 			// 再生
 			if (data) {
 				setImage(data.img);
 				var fileReader = new FileReader();
-				fileReader.onload = function() {
+				fileReader.onload = function () {
 					setAudio(fileReader.result);
 				};
 				fileReader.readAsArrayBuffer(data.audio);
+				spectrum_render = spectrum_renders[data.spectrum]
 			}
 		};
 	};
